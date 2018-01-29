@@ -2,7 +2,11 @@
 
 namespace App\Exceptions;
 
+namespace App\Exceptions;
 use Exception;
+//añadidas las dos siguientes por las dos ultimas funciones
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
 class Handler extends ExceptionHandler
@@ -15,7 +19,6 @@ class Handler extends ExceptionHandler
     protected $dontReport = [
         //
     ];
-
     /**
      * A list of the inputs that are never flashed for validation exceptions.
      *
@@ -25,7 +28,6 @@ class Handler extends ExceptionHandler
         'password',
         'password_confirmation',
     ];
-
     /**
      * Report or log an exception.
      *
@@ -38,7 +40,6 @@ class Handler extends ExceptionHandler
     {
         parent::report($exception);
     }
-
     /**
      * Render an exception into an HTTP response.
      *
@@ -50,17 +51,22 @@ class Handler extends ExceptionHandler
     {
         // This will replace our 404 response with
         // a JSON response.
-        if ($exception instanceof ModelNotFoundException &&
-            $request->wantsJson())
-        {
+        if ($exception instanceof ModelNotFoundException) {
             return response()->json([
-                'data' => 'Resource not found'
+                'error' => 'Resource not found'
             ], 404);
         }
-
         return parent::render($request, $exception);
     }
-
-
-
+    /**
+     * Convert an authentication exception into an unauthenticated response.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Auth\AuthenticationException  $exception
+     * @return \Illuminate\Http\Response
+     */
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        return response()->json(['error' => 'Unauthenticated'], 401);
+    }
 }
